@@ -10,7 +10,7 @@ class Subscriber(Node):
         self.subscriber = self.create_subscription(String, 'greetings', self.parse_msg, 10)
 
     def parse_msg(self, msg):
-        print(f"Greetings from my friend!: {msg}")
+        print(f"Greetings from my friend!: {msg.data}")
 
 def main(args=None):
     rclpy.init(args=args)
