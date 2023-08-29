@@ -1,6 +1,8 @@
 # ROS2 Cheatsheet
 There are a bunch of steps to working with ROS2 and a lot of links to navigate to find the steps (that all contain a bunch of extra info you don't really need to read every time), here's a handy doc to compile them!
 
+[Mike Ferguson's ros2_cookbook](https://github.com/mikeferguson/ros2_cookbook) is a good reference for a lot of this information. This document includes the most commonly used parts for CompRobo.
+
 ## One Time Setup
 Follow the steps on the [Environment Setup Page](https://comprobo23.github.io/How%20to/setup_your_environment) of the CompRobo website.
 
@@ -43,7 +45,7 @@ The setup instructions have you add this line to your `.bashrc`, which runs ever
 ### Make a New Node
 > A summary of the [Day 2 activity](https://comprobo22.github.io/in-class/day02#coding-exercises)
 
-Here is some barebones code for a node using `rclpy`, which is the Python package we will use to interface with ROS2.
+Here is some barebones code for a node using `rclpy`, which is the Python package we will use to interface with ROS2. [`rclpy` documentation](https://docs.ros2.org/latest/api/rclpy/) is a good reference for using it.
 
 ```python
 import rclpy
@@ -128,8 +130,40 @@ self.subscription = self.create_subscription(msg_type: Any, topic: str, callback
 ```
 The callback function determines what should occur when the node receives data from the topic. The callback function must have the message as an input parameter, but otherwise can do anything you'd like.
 
+### Launch Files
+Launch files are useful for when you want to run multiple nodes at once. They live in the `/launch` directory of a package. A basic launch file follows the following format:
+
+```python
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='pkg_name',
+            namespace='namespace', # doesn't affect functionality, usually just put the node name
+            executable='exec_name', # name of python script that spins the node
+            name='node_name',
+            parameters=[
+                {'param1': value},
+                {'param2': value},
+            ]
+        ),
+        # Repeat with more nodes     
+    ])
+```
+
+Launch files are run with:
+```
+ros2 launch pkg launch.py
+```
+
 ### Debugging Tools
 #### Useful ROS2 Commands
+* List all nodes currently running
+    ```
+    ros2 node list
+    ```
 * List all topics currently running
     ```
     ros2 topic list
