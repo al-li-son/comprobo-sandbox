@@ -1,4 +1,29 @@
-# ROS2 Cheatsheet
+- [ROS2 Cheatsheet (Python)](#ros2-cheatsheet-python)
+  - [One Time Setup](#one-time-setup)
+  - [QUICK ACCESS COMMANDS](#quick-access-commands)
+    - [Build ROS2 workspace](#build-ros2-workspace)
+    - [Source `setup.bash`](#source-setupbash)
+  - [Getting Started](#getting-started)
+    - [Create a Package](#create-a-package)
+    - [Make a New Node](#make-a-new-node)
+    - [Run Your Node](#run-your-node)
+    - [Interfaces](#interfaces)
+      - [Messages](#messages)
+      - [Services](#services)
+      - [Actions](#actions)
+    - [Publishing \& Subscribing](#publishing--subscribing)
+      - [Publisher](#publisher)
+      - [Subscription](#subscription)
+  - [Launch Files](#launch-files)
+  - [Debugging Tools](#debugging-tools)
+    - [Useful ROS2 Commands](#useful-ros2-commands)
+    - [rqt](#rqt)
+    - [rviz2](#rviz2)
+    - [rosbag Files](#rosbag-files)
+      - [Recording a Bag](#recording-a-bag)
+      - [Playing a Bag](#playing-a-bag)
+
+# ROS2 Cheatsheet (Python)
 There are a bunch of steps to working with ROS2 and a lot of links to navigate to find the steps (that all contain a bunch of extra info you don't really need to read every time), here's a handy doc to compile them!
 
 [Mike Ferguson's ros2_cookbook](https://github.com/mikeferguson/ros2_cookbook) is a good reference for a lot of this information. This document includes the most commonly used parts for CompRobo.
@@ -8,7 +33,7 @@ Follow the steps on the [Environment Setup Page](https://comprobo23.github.io/Ho
 
 ## QUICK ACCESS COMMANDS
 ### Build ROS2 workspace
->*You must do this any time you've made changes to your ROS2 packages*.
+>*You must do this any time you've made new ROS2 packages/nodes*.
 
 ```
 cd ~/ros2_ws
@@ -28,7 +53,7 @@ source ~/ros2_ws/install/setup.bash
 ```
 The setup instructions have you add this line to your `.bashrc`, which runs every time you open a new terminal. You should do this, but if you make a change and rebuild and do not open a new terminal remember to source again!
 
-## Getting Started (Python)
+## Getting Started
 ### Create a Package
 > A summary of the [ROS2 Creating a Package instructions](https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Creating-Your-First-ROS2-Package.html).
 
@@ -42,8 +67,12 @@ The setup instructions have you add this line to your `.bashrc`, which runs ever
     ```
     You can use optional flag `--node-name my_node` to create a blank node with this command.
 
+ROS will be able to find packages even if they are nested in the `/src` directory, so you can make multiple packages in one Git repo inside `/src`, for example.
+
 ### Make a New Node
 > A summary of the [Day 2 activity](https://comprobo22.github.io/in-class/day02#coding-exercises)
+
+Nodes live in a directory inside the package of the same name as the package.
 
 Here is some barebones code for a node using `rclpy`, which is the Python package we will use to interface with ROS2. [`rclpy` documentation](https://docs.ros2.org/latest/api/rclpy/) is a good reference for using it.
 
@@ -110,7 +139,10 @@ TODO
 TODO
 
 ### Publishing & Subscribing
-> A summary of the [Day 2 activity](https://comprobo22.github.io/in-class/day02#coding-exercises)
+> A summary of the [Day 2 activity](https://comprobo23.github.io/in-class/day02)
+
+Note that a single node can have both publishers and subscribers. For simplicity, the example nodes are separately a publisher and a subscriber.
+
 #### Publisher
 Create a publisher with:
 ```python
@@ -123,14 +155,14 @@ Once the publisher is created, you can publish messages of the correct type to i
 self.publisher.publish(msg)
 ```
 
-#### Subscriber
+#### Subscription
 Create a subscription with:
 ```python
 self.subscription = self.create_subscription(msg_type: Any, topic: str, callback, qos_profile: QoSProfile | int)
 ```
 The callback function determines what should occur when the node receives data from the topic. The callback function must have the message as an input parameter, but otherwise can do anything you'd like.
 
-### Launch Files
+## Launch Files
 Launch files are useful for when you want to run multiple nodes at once. They live in the `/launch` directory of a package. A basic launch file follows the following format:
 
 ```python
@@ -140,13 +172,16 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='pkg_name',
-            namespace='namespace', # doesn't affect functionality, usually just put the node name
-            executable='exec_name', # name of python script that spins the node
-            name='node_name',
-            parameters=[
+            package='pkg_name', # required
+            executable='exec_name', # required, name of python script that spins the node
+            name='node_name', # optional, useful for renaming nodes if you want to run multiple of the same node
+            parameters=[ # optional
                 {'param1': value},
                 {'param2': value},
+            ]
+            remappings=[ # optional, can remap topic names to other names, useful for running multiple of the same node
+                {'topic1', 'new_name1'},
+                {'topic2', 'new_name2'},
             ]
         ),
         # Repeat with more nodes     
@@ -158,8 +193,8 @@ Launch files are run with:
 ros2 launch pkg launch.py
 ```
 
-### Debugging Tools
-#### Useful ROS2 Commands
+## Debugging Tools
+### Useful ROS2 Commands
 * List all nodes currently running
     ```
     ros2 node list
@@ -176,9 +211,51 @@ ros2 launch pkg launch.py
     ```
     ros2 interfaces show pkg/msg/TYPE
     ```
-#### rqt
-TODO
-#### rviz2
-TODO
-#### bag Files
-TODO
+### rqt
+rqt is useful for visualizing the communication between your ROS nodes.
+
+Launch rqt with:
+```
+rqt
+```
+To see the node graph, navigate to:
+```
+Plugins -> Introspection -> Node Graph
+```
+rqt will also be useful for viewing the stream from the camera with:
+```
+Plugins -> Visualization -> Image View
+```
+### rviz2
+rviz2 is useful for visualizing the sensor and odometry data from your robot.
+
+Launch rviz2 with:
+```
+rviz2
+```
+You can add topics to visualize with the `add` button on the bottom left. It's recommended to add `/device_pose`, which will show a vector representing the position and orientation of the robot. 
+
+There are a lot of transforms under the `/tf` topic, `/base_link` is the robot coordinate frame.
+
+`/scan` is also useful to visualize the lidar scan from the robot.
+
+### rosbag Files
+Bag files are recordings of ROS topic data. They can be very useful for debugging, iterating on your code without having to run a Neato, and demos.
+
+#### Recording a Bag
+```
+ros2 bag record [TOPIC(s)] -o bag-file-name
+```
+
+It's best not to record all topics, especially for the Neato, as the file can get very large. Specifically, don't record /camera/image_raw or /gazebo/.
+
+A good go-to command to record most of the information you'll need with a Neato:
+```
+ros2 bag record /accel /bump /odom /cmd_vel /scan /stable_scan /projected_stable_scan /tf /tf_static -o bag-file-name
+```
+
+#### Playing a Bag
+```
+ros2 bag play /path/to/bag
+```
+While a bag is playing you'll be able to view and echo topics and run nodes to interact with these topics exactly as if the Neato or simulator were running.
