@@ -163,7 +163,7 @@ self.subscription = self.create_subscription(msg_type: Any, topic: str, callback
 The callback function determines what should occur when the node receives data from the topic. The callback function must have the message as an input parameter, but otherwise can do anything you'd like.
 
 ## Launch Files
-Launch files are useful for when you want to run multiple nodes at once. They live in the `/launch` directory of a package. A basic launch file follows the following format:
+Launch files are useful for when you want to run multiple nodes at once. It's usually best create a `/launch` directory in your package to put launch files. A basic launch file follows the following format:
 
 ```python
 from launch import LaunchDescription
@@ -175,10 +175,10 @@ def generate_launch_description():
             package='pkg_name', # required
             executable='exec_name', # required, name of python script that spins the node
             name='node_name', # optional, useful for renaming nodes if you want to run multiple of the same node
-            parameters=[ # optional
+            parameters=[ # optional, if your node takes arguments
                 {'param1': value},
                 {'param2': value},
-            ]
+            ],
             remappings=[ # optional, can remap topic names to other names, useful for running multiple of the same node
                 {'topic1', 'new_name1'},
                 {'topic2', 'new_name2'},
@@ -187,6 +187,17 @@ def generate_launch_description():
         # Repeat with more nodes     
     ])
 ```
+
+To run a launch file, you need to add it to your setup.py in the `data_files` list:
+```python
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name, ['launch/LAUNCH_FILE_NAME.py'])
+    ],
+```
+Then you **need to rebuild and resource** because the launch file will not be placed in the `/share` directory until the package is built.
 
 Launch files are run with:
 ```
@@ -209,7 +220,7 @@ ros2 launch pkg launch.py
     ```
 * Get the fields of a message type
     ```
-    ros2 interfaces show pkg/msg/TYPE
+    ros2 interface show pkg/msg/TYPE
     ```
 ### rqt
 rqt is useful for visualizing the communication between your ROS nodes.
