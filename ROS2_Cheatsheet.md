@@ -1,4 +1,4 @@
-- [ROS2 Cheatsheet (Python)](#ros2-cheatsheet-python)
+- [ROS2 Humble Cheatsheet (Python)](#ros2-humble-cheatsheet-python)
   - [One Time Setup](#one-time-setup)
   - [QUICK ACCESS COMMANDS](#quick-access-commands)
     - [Build ROS2 workspace](#build-ros2-workspace)
@@ -23,7 +23,7 @@
       - [Recording a Bag](#recording-a-bag)
       - [Playing a Bag](#playing-a-bag)
 
-# ROS2 Cheatsheet (Python)
+# ROS2 Humble Cheatsheet (Python)
 There are a bunch of steps to working with ROS2 and a lot of links to navigate to find the steps (that all contain a bunch of extra info you don't really need to read every time), here's a handy doc to compile them!
 
 [Mike Ferguson's ros2_cookbook](https://github.com/mikeferguson/ros2_cookbook) is a good reference for a lot of this information. This document includes the most commonly used parts for CompRobo.
@@ -115,11 +115,11 @@ if __name__ == '__main__':
 Interfaces are the methods through which ROS nodes communicate with each other. There are three types: messages, services, and actions. Messages will be the most frequently used in this course.
 
 #### Messages
-`.msg` files are included in the `/msg` directory of a package. They contain fields consisting of a type, name, and optionally a default value.
+`.msg` files are included in the `msg/` directory of a package. They contain fields consisting of a type, name, and optionally a default value.
 
-Documentation for message types included in your ROS2 Humble install are on the [ROS2 docs page](https://docs.ros.org/en/foxy/Concepts/About-ROS-Interfaces.html). You can also find the fields of the message with:
+Documentation for message types included in your ROS2 Humble install are on the [ROS2 docs page](https://docs.ros2.org/latest/api/). You can also find the fields of the message with:
 ```
-ros2 interfaces show pkg/msg/TYPE
+ros2 interface show pkg/msg/TYPE
 ```
 You will most commonly interface with:
 * [`std_msgs`](https://docs.ros2.org/latest/api/std_msgs/msg/): includes basic types like String, Bool, ints, floats, etc.
@@ -134,9 +134,23 @@ from sensor_msgs.msg import [TYPE]
 ```
 
 #### Services
-TODO
+Services consist of a request from a client and a response from a server. The client (requester) sends information to
+a server (responder) and waits for it to do a short computation and return a result.
+
+`.srv` files are included in the `srv/` directory of a package. They contain a request and a response message type, separated by a `---`. 
+
+Examples can be found on the [ROS2 Services docs page](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html)
+
+ROS2 comes with a few standard services defined in the `std_srv` package. 
+
 #### Actions
-TODO
+Actions are a long-running request/response communication. Unlike services, they can run for many seconds, provide feedback while they are occuring, and be inturrupted.
+
+`.action` files are included in the `action/` directory of a package. They contain a request type, a response type, and a feedback type separated by `---`. 
+
+Examples can be found on the [ROS2 Actions docs page](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html)
+
+ROS2 comes with an example action, Fibonacci, found in the [`example_interfaces`](https://docs.ros2.org/latest/api/example_interfaces/action/) package.
 
 ### Publishing & Subscribing
 > A summary of the [Day 2 activity](https://comprobo23.github.io/in-class/day02)
@@ -163,7 +177,7 @@ self.subscription = self.create_subscription(msg_type: Any, topic: str, callback
 The callback function determines what should occur when the node receives data from the topic. The callback function must have the message as an input parameter, but otherwise can do anything you'd like.
 
 ## Launch Files
-Launch files are useful for when you want to run multiple nodes at once. It's usually best create a `/launch` directory in your package to put launch files. A basic launch file follows the following format:
+Launch files are useful for when you want to run multiple nodes at once. It's usually best create a `launch/` directory in your package to put launch files. A basic launch file follows the following format:
 
 ```python
 from launch import LaunchDescription
@@ -222,6 +236,7 @@ ros2 launch pkg launch.py
     ```
     ros2 interface show pkg/msg/TYPE
     ```
+    Also works for services and actions, replace input with `pkg/srv/TYPE` or `pkg/action/TYPE`
 ### rqt
 rqt is useful for visualizing the communication between your ROS nodes.
 
