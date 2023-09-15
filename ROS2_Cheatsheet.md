@@ -232,6 +232,14 @@ ros2 launch pkg launch.py
     ```
     ros2 topic echo [TOPIC]
     ```
+* Get the type of a topic
+    ```
+    ros2 topic type [TOPIC]
+    ```
+    OR
+    ```
+    ros2 topic info [TOPIC]
+    ```
 * Get the fields of a message type
     ```
     ros2 interface show pkg/msg/TYPE
