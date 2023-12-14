@@ -194,8 +194,8 @@ def generate_launch_description():
                 {'param2': value},
             ],
             remappings=[ # optional, can remap topic names to other names, useful for running multiple of the same node
-                {'topic1', 'new_name1'},
-                {'topic2', 'new_name2'},
+                ('topic1', 'new_name1'),
+                ('topic2', 'new_name2'),
             ]
         ),
         # Repeat with more nodes     
